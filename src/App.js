@@ -83,13 +83,33 @@ function App() {
                     <WindowContent>
                         <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
                             <Tab value={'details'}>Details</Tab>
+                            <Tab value={'sql'}>SQL</Tab>
+                            <Tab value={'columns'}>Columns</Tab>
                         </Tabs>
                         {activeModel && (
                             <TabBody>
                                 {activeTab === 'details' && (
                                     <Fieldset label={'Description'}>
                                         {activeModel.description}
+                                        {activeModel.database}
+                                        {activeModel.schema}
+                                        {activeModel.name}
+                                        {activeModel.tags}
+                                        {activeModel.created_at}
+                                        {activeModel.config.materialized}
                                     </Fieldset>
+                                )}
+                                {activeTab === 'columns' && (
+                                    Object.values(activeModel.columns).map(col => (
+                                        <p key={col.name}>
+                                            {col.name}: {col.description}
+                                        </p>
+                                    ))
+                                )}
+                                {activeTab === 'sql' && (
+                                    <p>
+                                        {activeModel.compiled_sql}
+                                    </p>
                                 )}
                             </TabBody>
                         )}
