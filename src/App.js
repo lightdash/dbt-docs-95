@@ -1,19 +1,19 @@
 import {
     AppWrapper,
-    Container, DocsWindow,
+    Container, DetailFieldset, DocsWindow,
     GlobalStyles,
     LogoWrapper, SidebarContent, SidebarWindow,
-    SideBarWindow, WhitePane,
+    SideBarWindow, SqlPreview, WhitePane,
     WindowsThemeProvider
 } from "./styles";
 import {
     AppBar, Button, Cutout, Divider, Fieldset,
     List,
-    ListItem, Tab, TabBody,
+    ListItem, Radio, Tab, TabBody,
     Table, TableBody, TableDataCell,
     TableHead,
     TableHeadCell,
-    TableRow, Tabs,
+    TableRow, Tabs, TextField,
     Toolbar,
     Window, WindowContent,
     WindowHeader
@@ -26,7 +26,7 @@ const models = Object.values(dbtManifest.nodes).filter(node => node.resource_typ
 
 const Logo = () => (
     <LogoWrapper>
-        <img src={logoImage} height={24} />
+        <img src={logoImage} height={24}/>
         <span>
             DataWin95
         </span>
@@ -35,90 +35,146 @@ const Logo = () => (
 
 
 function App() {
-  const [activeModelId, setActiveModelId] = useState();
-  const activeModel = activeModelId && dbtManifest.nodes[activeModelId];
-  const [activeTab, setActiveTab] = useState('details');
-  return (
-      <AppWrapper>
-        <GlobalStyles />
-        <WindowsThemeProvider>
-            <AppBar>
-                <Toolbar>
-                    <Logo />
-                </Toolbar>
-            </AppBar>
-            <Container>
-                <SidebarWindow>
-                    <WindowHeader active={false}>
-                        <span>models.exe</span>
-                    </WindowHeader>
-                    <SidebarContent>
-                        <Cutout>
-                            <p>
-                                Select a dbt model to view docs
-                            </p>
-                        </Cutout>
-                        <Table>
-                            <TableHead>
-                                <TableRow head>
-                                    <TableHeadCell>Name</TableHeadCell>
-                                    <TableHeadCell>Type</TableHeadCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {models.map(model => (
-                                    <TableRow key={model.unique_id} onClick={() => setActiveModelId(model.unique_id)}>
-                                        <TableDataCell>{model.name}</TableDataCell>
-                                        <TableDataCell>model</TableDataCell>
+    const [activeModelId, setActiveModelId] = useState(models[0].unique_id);
+    const activeModel = activeModelId && dbtManifest.nodes[activeModelId];
+    const [activeTab, setActiveTab] = useState('details');
+    const [sqlOption, setSqlOption] = useState('compiled_sql');
+    const handleSqlOptionChange = e => setSqlOption(e.target.value);
+    return (
+        <AppWrapper>
+            <GlobalStyles/>
+            <WindowsThemeProvider>
+                <AppBar>
+                    <Toolbar>
+                        <Logo/>
+                    </Toolbar>
+                </AppBar>
+                <Container>
+                    <SidebarWindow>
+                        <WindowHeader active={false}>
+                            <span>models.exe</span>
+                        </WindowHeader>
+                        <SidebarContent>
+                            <Cutout>
+                                <p>
+                                    Select a dbt model to view docs
+                                </p>
+                            </Cutout>
+                            <Table>
+                                <TableHead>
+                                    <TableRow head>
+                                        <TableHeadCell>Name</TableHeadCell>
+                                        <TableHeadCell>Type</TableHeadCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </SidebarContent>
-                </SidebarWindow>
-                <DocsWindow>
-                    <WindowHeader active={true}>
-                        <span>docs.exe</span>
-                    </WindowHeader>
-                    <WindowContent>
-                        <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
-                            <Tab value={'details'}>Details</Tab>
-                            <Tab value={'sql'}>SQL</Tab>
-                            <Tab value={'columns'}>Columns</Tab>
-                        </Tabs>
-                        {activeModel && (
-                            <TabBody>
-                                {activeTab === 'details' && (
-                                    <Fieldset label={'Description'}>
-                                        {activeModel.description}
-                                        {activeModel.database}
-                                        {activeModel.schema}
-                                        {activeModel.name}
-                                        {activeModel.tags}
-                                        {activeModel.created_at}
-                                        {activeModel.config.materialized}
-                                    </Fieldset>
-                                )}
-                                {activeTab === 'columns' && (
-                                    Object.values(activeModel.columns).map(col => (
-                                        <p key={col.name}>
-                                            {col.name}: {col.description}
-                                        </p>
-                                    ))
-                                )}
-                                {activeTab === 'sql' && (
-                                    <p>
-                                        {activeModel.compiled_sql}
-                                    </p>
-                                )}
-                            </TabBody>
-                        )}
-                    </WindowContent>
-                </DocsWindow>
-            </Container>
-        </WindowsThemeProvider>
-      </AppWrapper>
-  );
+                                </TableHead>
+                                <TableBody>
+                                    {models.map(model => (
+                                        <TableRow key={model.unique_id}
+                                                  onClick={() => setActiveModelId(model.unique_id)}
+                                                  style={model.unique_id === activeModelId ? {
+                                                      background: 'rgb(6, 0, 132)',
+                                                      color: 'rgb(254, 254, 254)'
+                                                  } : undefined}>
+                                            <TableDataCell>{model.name}</TableDataCell>
+                                            <TableDataCell>model</TableDataCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </SidebarContent>
+                    </SidebarWindow>
+                    <DocsWindow>
+                        <WindowHeader active={true}>
+                            <span>docs.exe</span>
+                        </WindowHeader>
+                        <WindowContent>
+                            <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
+                                <Tab value={'details'}>Details</Tab>
+                                <Tab value={'sql'}>SQL</Tab>
+                                <Tab value={'columns'}>Columns</Tab>
+                            </Tabs>
+                            {activeModel && (
+                                <TabBody>
+                                    {activeTab === 'details' && (
+                                        <>
+                                            <DetailFieldset label={'Name'}>
+                                                {activeModel.name}
+                                            </DetailFieldset>
+                                            {activeModel.description && (
+                                                <DetailFieldset label={'Description'}>
+                                                    {activeModel.description}
+                                                </DetailFieldset>
+                                            )}
+                                            <DetailFieldset label={'Database'}>
+                                                {activeModel.database}
+                                            </DetailFieldset>
+                                            <DetailFieldset label={'Schema'}>
+                                                {activeModel.schema}
+                                            </DetailFieldset>
+                                            {activeModel.tags.length > 0 && (
+                                                <DetailFieldset label={'Tags'}>
+                                                    {activeModel.tags}
+                                                </DetailFieldset>
+                                            )}
+                                            <Fieldset label={'Created at'}>
+                                                {new Date(activeModel.created_at).toUTCString()}
+                                            </Fieldset>
+                                        </>
+                                    )}
+                                    {activeTab === 'columns' && (
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow head>
+                                                    <TableHeadCell>Name</TableHeadCell>
+                                                    <TableHeadCell>Type</TableHeadCell>
+                                                    <TableHeadCell>Description</TableHeadCell>
+                                                    <TableHeadCell>Tags</TableHeadCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {Object.values(activeModel.columns).map(col => (
+                                                    <TableRow>
+                                                        <TableDataCell>{col.name}</TableDataCell>
+                                                        <TableDataCell>{col.data_type}</TableDataCell>
+                                                        <TableDataCell>{col.description}</TableDataCell>
+                                                        <TableDataCell>{col.tags}</TableDataCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    )}
+                                    {activeTab === 'sql' && (
+                                        <>
+                                            <Fieldset label='SQL'>
+                                                <Radio
+                                                    checked={sqlOption === 'compiled_sql'}
+                                                    onChange={handleSqlOptionChange}
+                                                    value='compiled_sql'
+                                                    label='Compiled'
+                                                    name='SQL'
+                                                />
+                                                <br/>
+                                                <Radio
+                                                    checked={sqlOption === 'raw_sql'}
+                                                    onChange={handleSqlOptionChange}
+                                                    value='raw_sql'
+                                                    label='Raw'
+                                                    name='SQL'
+                                                />
+                                            </Fieldset>
+                                            <SqlPreview>
+                                                {activeModel[sqlOption]}
+                                            </SqlPreview>
+                                        </>
+                                    )}
+                                </TabBody>
+                            )}
+                        </WindowContent>
+                    </DocsWindow>
+                </Container>
+            </WindowsThemeProvider>
+        </AppWrapper>
+    );
 }
 
 export default App;

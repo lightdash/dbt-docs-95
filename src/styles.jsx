@@ -2,7 +2,7 @@ import styled, {createGlobalStyle, ThemeProvider} from "styled-components";
 import original from "react95/dist/themes/original";
 import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
-import {Cutout, Window, WindowContent} from "react95";
+import {Cutout, Fieldset, Window, WindowContent} from "react95";
 
 export const GlobalStyles = createGlobalStyle`
   @font-face {
@@ -11,27 +11,29 @@ export const GlobalStyles = createGlobalStyle`
     font-weight: 400;
     font-style: normal
   }
+
   @font-face {
     font-family: 'ms_sans_serif';
     src: url('${ms_sans_serif_bold}') format('woff2');
     font-weight: bold;
     font-style: normal
   }
+
   body {
     font-family: 'ms_sans_serif';
   }
 `
 
-export const WindowsThemeProvider = ({ children }) => (
+export const WindowsThemeProvider = ({children}) => (
     <ThemeProvider theme={original}>
         {children}
     </ThemeProvider>
 )
 
 export const AppWrapper = styled.div`
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 `
 
 export const Container = styled.div`
@@ -60,11 +62,21 @@ export const DocsWindow = styled(Window)`
 `
 
 export const WhitePane = styled(Cutout)`
-    background-color: white;
+  background-color: white;
 `
 
 export const SidebarContent = styled(WindowContent)`
-display: flex;
-flex-direction: column;
-gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`
+
+export const DetailFieldset = styled(Fieldset)`
+  margin-bottom: 20px;
+`
+
+export const SqlPreview = styled(Cutout)`
+  height: 400px;
+  margin-top: 20px;
+  white-space: pre-line;
 `
