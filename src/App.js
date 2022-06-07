@@ -92,6 +92,7 @@ function App() {
                                 <Tab value={'details'}>Details</Tab>
                                 <Tab value={'sql'}>SQL</Tab>
                                 <Tab value={'columns'}>Columns</Tab>
+                                <Tab value={'metrics'}>Metrics</Tab>
                             </Tabs>
                             {activeModel && (
                                 <TabBody>
@@ -166,6 +167,35 @@ function App() {
                                                 {activeModel[sqlOption]}
                                             </SqlPreview>
                                         </>
+                                    )}
+                                    {activeTab === 'metrics' && (
+                                        <Table>
+                                            <TableHead>
+                                                <TableRow head>
+                                                    <TableHeadCell>Name</TableHeadCell>
+                                                    <TableHeadCell>Type</TableHeadCell>
+                                                    <TableHeadCell>Description</TableHeadCell>
+                                                    <TableHeadCell>Related column</TableHeadCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {
+                                                    Object.values(activeModel.columns).map((col) => (
+                                                        <>
+                                                            {Object.entries(col.meta?.metrics || {}).map(([key, metric]) => (
+                                                                <TableRow>
+                                                                    <TableDataCell>{key}</TableDataCell>
+                                                                    <TableDataCell>{metric.type}</TableDataCell>
+                                                                    <TableDataCell>{metric.description}</TableDataCell>
+                                                                    <TableDataCell>{col.name}</TableDataCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </>
+                                                    ))
+
+                                                }
+                                            </TableBody>
+                                        </Table>
                                     )}
                                 </TabBody>
                             )}
