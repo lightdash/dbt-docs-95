@@ -80,3 +80,9 @@ export const SqlPreview = styled(Cutout)`
   margin-top: 20px;
   white-space: pre-line;
 `
+
+export const JoinPreview = styled(Cutout)`
+  height: 100px;
+  white-space: pre-line;
+`
+

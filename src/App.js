@@ -1,7 +1,7 @@
 import {
     AppWrapper,
     Container, DetailFieldset, DocsWindow,
-    GlobalStyles,
+    GlobalStyles, JoinPreview,
     LogoWrapper, SidebarContent, SidebarWindow,
     SideBarWindow, SqlPreview, WhitePane,
     WindowsThemeProvider
@@ -20,7 +20,7 @@ import {
 } from "react95";
 import logoImage from './sad-start.png';
 import dbtManifest from './manifest.json';
-import {useState} from "react";
+import {useMemo, useState} from "react";
 
 const models = Object.values(dbtManifest.nodes).filter(node => node.resource_type === 'model');
 
@@ -39,6 +39,12 @@ function App() {
     const activeModel = activeModelId && dbtManifest.nodes[activeModelId];
     const [activeTab, setActiveTab] = useState('details');
     const [sqlOption, setSqlOption] = useState('compiled_sql');
+    const hasMetrics = useMemo(() => {
+        return Object.values(activeModel.columns).some((col) => col.meta?.metrics && Object.entries(col.meta?.metrics).length > 0);
+    }, [activeModel]);
+    const hasJoins = useMemo(() => {
+        return activeModel.config.meta.joins && activeModel.config.meta.joins.length > 0;
+    }, [activeModel]);
     const handleSqlOptionChange = e => setSqlOption(e.target.value);
     return (
         <AppWrapper>
@@ -90,9 +96,10 @@ function App() {
                         <WindowContent>
                             <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
                                 <Tab value={'details'}>Details</Tab>
+                                {hasJoins && <Tab value={'joins'}>Joins</Tab>}
                                 <Tab value={'sql'}>SQL</Tab>
                                 <Tab value={'columns'}>Columns</Tab>
-                                <Tab value={'metrics'}>Metrics</Tab>
+                                {hasMetrics && <Tab value={'metrics'}>Metrics</Tab>}
                             </Tabs>
                             {activeModel && (
                                 <TabBody>
@@ -115,6 +122,11 @@ function App() {
                                             {activeModel.tags.length > 0 && (
                                                 <DetailFieldset label={'Tags'}>
                                                     {activeModel.tags}
+                                                </DetailFieldset>
+                                            )}
+                                            {activeModel.config.materialized && (
+                                                <DetailFieldset label={'Type'}>
+                                                    {activeModel.config.materialized}
                                                 </DetailFieldset>
                                             )}
                                             <Fieldset label={'Created at'}>
@@ -168,7 +180,14 @@ function App() {
                                             </SqlPreview>
                                         </>
                                     )}
-                                    {activeTab === 'metrics' && (
+                                    {activeTab === 'joins' && hasJoins && activeModel.config.meta.joins.map((join) => (
+                                        <DetailFieldset label={`Join "${join.join}"`}>
+                                            <JoinPreview>
+                                                {join.sql_on}
+                                            </JoinPreview>
+                                        </DetailFieldset>
+                                    ))}
+                                    {activeTab === 'metrics' && hasMetrics && (
                                         <Table>
                                             <TableHead>
                                                 <TableRow head>
