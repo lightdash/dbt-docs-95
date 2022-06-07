@@ -61,9 +61,6 @@ export const DocsWindow = styled(Window)`
   flex: 1;
 `
 
-export const WhitePane = styled(Cutout)`
-  background-color: white;
-`
 
 export const SidebarContent = styled(WindowContent)`
   display: flex;
@@ -80,9 +77,3 @@ export const SqlPreview = styled(Cutout)`
   margin-top: 20px;
   white-space: pre-line;
 `
-
-export const JoinPreview = styled(Cutout)`
-  height: 100px;
-  white-space: pre-line;
-`
-

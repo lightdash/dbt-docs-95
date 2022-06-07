@@ -1,32 +1,32 @@
 import {
     AppWrapper,
     Container, DetailFieldset, DocsWindow,
-    GlobalStyles, JoinPreview,
+    GlobalStyles,
     LogoWrapper, SidebarContent, SidebarWindow,
-    SideBarWindow, SqlPreview, WhitePane,
+     SqlPreview,
     WindowsThemeProvider
 } from "./styles";
 import {
-    AppBar, Button, Cutout, Divider, Fieldset,
-    List,
-    ListItem, Radio, Tab, TabBody,
+    AppBar,  Cutout,  Fieldset,
+
+     Radio, Tab, TabBody,
     Table, TableBody, TableDataCell,
     TableHead,
     TableHeadCell,
-    TableRow, Tabs, TextField,
+    TableRow, Tabs,
     Toolbar,
-    Window, WindowContent,
+    WindowContent,
     WindowHeader
 } from "react95";
 import logoImage from './sad-start.png';
 import dbtManifest from './manifest.json';
-import {useMemo, useState} from "react";
+import {useState} from "react";
 
 const models = Object.values(dbtManifest.nodes).filter(node => node.resource_type === 'model');
 
 const Logo = () => (
     <LogoWrapper>
-        <img src={logoImage} height={24}/>
+        <img alt='wind-no logo' src={logoImage} height={24}/>
         <span>
             DataWin95
         </span>
@@ -39,12 +39,8 @@ function App() {
     const activeModel = activeModelId && dbtManifest.nodes[activeModelId];
     const [activeTab, setActiveTab] = useState('details');
     const [sqlOption, setSqlOption] = useState('compiled_sql');
-    const hasMetrics = useMemo(() => {
-        return Object.values(activeModel.columns).some((col) => col.meta?.metrics && Object.entries(col.meta?.metrics).length > 0);
-    }, [activeModel]);
-    const hasJoins = useMemo(() => {
-        return activeModel.config.meta.joins && activeModel.config.meta.joins.length > 0;
-    }, [activeModel]);
+    const metrics = Object.values(dbtManifest.metrics).filter(metric => metric.refs?.[0]?.[0] === activeModel.name)
+    const hasMetrics = metrics.length > 0;
     const handleSqlOptionChange = e => setSqlOption(e.target.value);
     return (
         <AppWrapper>
@@ -96,7 +92,6 @@ function App() {
                         <WindowContent>
                             <Tabs value={activeTab} onChange={(e, value) => setActiveTab(value)}>
                                 <Tab value={'details'}>Details</Tab>
-                                {hasJoins && <Tab value={'joins'}>Joins</Tab>}
                                 <Tab value={'sql'}>SQL</Tab>
                                 <Tab value={'columns'}>Columns</Tab>
                                 {hasMetrics && <Tab value={'metrics'}>Metrics</Tab>}
@@ -180,13 +175,6 @@ function App() {
                                             </SqlPreview>
                                         </>
                                     )}
-                                    {activeTab === 'joins' && hasJoins && activeModel.config.meta.joins.map((join) => (
-                                        <DetailFieldset label={`Join "${join.join}"`}>
-                                            <JoinPreview>
-                                                {join.sql_on}
-                                            </JoinPreview>
-                                        </DetailFieldset>
-                                    ))}
                                     {activeTab === 'metrics' && hasMetrics && (
                                         <Table>
                                             <TableHead>
@@ -194,24 +182,19 @@ function App() {
                                                     <TableHeadCell>Name</TableHeadCell>
                                                     <TableHeadCell>Type</TableHeadCell>
                                                     <TableHeadCell>Description</TableHeadCell>
-                                                    <TableHeadCell>Related column</TableHeadCell>
+                                                    <TableHeadCell>Sql</TableHeadCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
                                                 {
-                                                    Object.values(activeModel.columns).map((col) => (
-                                                        <>
-                                                            {Object.entries(col.meta?.metrics || {}).map(([key, metric]) => (
-                                                                <TableRow>
-                                                                    <TableDataCell>{key}</TableDataCell>
+                                                    metrics.map((metric) => (
+                                                                <TableRow key={metric.name}>
+                                                                    <TableDataCell>{metric.label}</TableDataCell>
                                                                     <TableDataCell>{metric.type}</TableDataCell>
                                                                     <TableDataCell>{metric.description}</TableDataCell>
-                                                                    <TableDataCell>{col.name}</TableDataCell>
+                                                                    <TableDataCell>{metric.sql}</TableDataCell>
                                                                 </TableRow>
-                                                            ))}
-                                                        </>
-                                                    ))
-
+                                                            ))
                                                 }
                                             </TableBody>
                                         </Table>
